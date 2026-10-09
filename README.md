@@ -96,7 +96,7 @@ The path must exist on the machine running this MCP server. If you later deploy 
 | `get_upload_status` | Check a persistent upload job |
 | `get_track_status` | Check a track's processing state |
 
-Playlists must be selected explicitly by UUID or a Yandex Music playlist URL. Use pagination fields to read subsequent pages. Uploads are serialized. A completed job confirms both a playable track and playlist membership.
+Playlists must be selected explicitly by UUID or a Yandex Music playlist URL. Pagination is zero-based: omit `page` or use `page: 0` for the first page, then pass `next_page` from the response when it is not `null`. Uploads are serialized. A completed job confirms both a playable track and playlist membership.
 
 If a transfer is interrupted, its outcome may be unknown. Check the existing job or track before retrying. Jobs survive restarts, and interrupted transfers are never resent automatically. `force: true` intentionally bypasses deduplication and can create a duplicate.
 

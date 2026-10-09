@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@modelcontextprotocol/sdk/*": [
+        "node_modules/@modelcontextprotocol/sdk/dist/esm/*"
+      ]
+    }
+  }
+}
