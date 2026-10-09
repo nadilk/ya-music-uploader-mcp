@@ -52,10 +52,6 @@ test('local paths accept absolute paths, relative paths, and symlinks without a 
   assert.equal(await service.resolveLocalPath(outside), outside);
   assert.equal(await service.resolveLocalPath('../outside.mp3'), outside);
   assert.equal(await service.resolveLocalPath('link.mp3'), outside);
-  const listing = await service.listLocalFiles();
-  assert.equal(listing.directory, service.workingDirectory);
-  assert.deepEqual(listing.files.map((file) => file.name), ['link.mp3', 'sample.mp3']);
-  assert.equal(listing.files[0].path, outside);
   await assert.rejects(service.startUpload({ filePath: 'credentials.json', playlistId }), /audio file/);
   await assert.rejects(service.startUpload({ playlistId }), /file_path is required/);
   await assert.rejects(service.startUpload({ filePath: 'missing.mp3', playlistId }), { code: 'ENOENT' });

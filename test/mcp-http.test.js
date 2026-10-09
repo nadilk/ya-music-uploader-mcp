@@ -6,7 +6,6 @@ import { createMcpApp } from '../src/mcp-http.js';
 
 test('real MCP client initializes, lists tools, and calls them over Streamable HTTP', async (t) => {
   const service = {
-    workingDirectory: '/project',
     startUpload: async (input) => ({ job_id: 'local-job', ...input }),
     getAuthStatus: async () => ({ authenticated: true, uid: '123' }),
     listPlaylists: async ({ page, pageSize }) => ({ playlists: [{ id: 'example', title: 'Sample' }], page, page_size: pageSize }),
@@ -23,10 +22,7 @@ test('real MCP client initializes, lists tools, and calls them over Streamable H
   const upload = tools.find((tool) => tool.name === 'upload_track');
   assert.ok(upload.inputSchema.required.includes('file_path'));
   assert.equal(upload.inputSchema.properties.file_id, undefined);
-  assert.equal(tools.some((tool) => tool.name === 'list_staged_files' || tool.name === 'delete_staged_file'), false);
-  const info = (await client.callTool({ name: 'get_server_info', arguments: {} })).structuredContent;
-  assert.equal(info.working_directory, '/project');
-  assert.equal(info.file_transfer, undefined);
+  assert.equal(tools.some((tool) => ['list_staged_files', 'delete_staged_file', 'list_local_files', 'get_server_info'].includes(tool.name)), false);
   assert.equal((await client.callTool({ name: 'upload_track', arguments: { playlist_id: '00000000-0000-4000-8000-000000000001' } })).isError, true);
   const job = (await client.callTool({ name: 'upload_track', arguments: { file_path: '/home/user/song.mp3', playlist_id: '00000000-0000-4000-8000-000000000001' } })).structuredContent;
   assert.equal(job.filePath, '/home/user/song.mp3');

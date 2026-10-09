@@ -42,7 +42,7 @@ On the next start, the server generates a new MCP URL. Update your agent configu
 
 ## Upload local audio
 
-Pass the local audio path directly to `upload_track`:
+Find the file using your agent's filesystem tools and pass its absolute path on the server machine directly to `upload_track`:
 
 ```json
 {
@@ -51,7 +51,7 @@ Pass the local audio path directly to `upload_track`:
 }
 ```
 
-Absolute paths can point to any audio file readable by the server process. Relative paths resolve from the directory where you started the server; for example, `test-data/sample-30s.mp3` when started from the project root. `get_server_info` returns that working directory, and `list_local_files` can browse a local directory for audio files.
+Absolute paths are recommended and can point to any audio file readable by the server process. Relative paths resolve from the directory where you started the server; for example, `test-data/sample-30s.mp3` when started from the project root.
 
 On WSL, use Linux paths such as `/home/user/Music/track.mp3` or `/mnt/c/Users/user/Music/track.mp3`.
 
@@ -67,7 +67,6 @@ The path must exist on the machine running this MCP server. If you later deploy 
 
 | Tool | Purpose |
 | --- | --- |
-| `get_server_info` | Working directory, audio size limit, and authentication method |
 | `get_auth_status` | Verify the saved account |
 | `init_auth` | Return a login URL and code |
 | `complete_auth` | Wait for approval and save the verified token |
@@ -77,7 +76,6 @@ The path must exist on the machine running this MCP server. If you later deploy 
 | `upload_track` | Queue an upload from a local `file_path` |
 | `get_upload_status` | Check a persistent upload job |
 | `get_track_status` | Check a track's processing state |
-| `list_local_files` | Browse audio files in a local directory |
 
 Playlists must be selected explicitly by UUID or a Yandex Music playlist URL. Use pagination fields to read subsequent pages. Uploads are serialized. A completed job confirms both a playable track and playlist membership.
 

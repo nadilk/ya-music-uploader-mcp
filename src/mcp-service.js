@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { readFile, readdir, realpath, stat } from 'node:fs/promises';
+import { readFile, realpath, stat } from 'node:fs/promises';
 import { extname, resolve } from 'node:path';
 import { setTimeout } from 'node:timers/promises';
 import { AuthFlow } from './mcp-auth.js';
@@ -74,22 +74,6 @@ export class MusicService {
 
   async resolveLocalPath(path = '.') {
     return realpath(resolve(this.workingDirectory, path));
-  }
-
-  async listLocalFiles({ directory = '.', offset = 0, limit = 100 } = {}) {
-    const folder = await this.resolveLocalPath(directory);
-    const entries = (await readdir(folder, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name));
-    const available = [];
-    for (const entry of entries) {
-      if (entry.name.startsWith('.')) continue;
-      let path;
-      try { path = await this.resolveLocalPath(resolve(folder, entry.name)); } catch { continue; }
-      const info = await stat(path);
-      if (info.isDirectory() || (info.isFile() && audioExtensions.has(extname(path).toLowerCase()))) {
-        available.push({ name: entry.name, path, type: info.isDirectory() ? 'directory' : 'audio', size_bytes: info.isFile() ? info.size : undefined });
-      }
-    }
-    return { directory: folder, files: available.slice(offset, offset + limit), total: available.length, next_offset: offset + limit < available.length ? offset + limit : null };
   }
 
   async getAuthStatus() {
