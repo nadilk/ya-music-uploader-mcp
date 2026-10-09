@@ -8,36 +8,36 @@ This project uses unofficial Yandex Music endpoints, which may change. Device lo
 
 Requires Node.js 22 or later.
 
+Run from the project root. In Windows PowerShell, use `npm.cmd` because PowerShell may block `npm.ps1`:
+
+```powershell
+npm.cmd ci
+npm.cmd start
+```
+
+On Linux, macOS, or WSL, use:
+
 ```sh
 npm ci
 npm start
 ```
 
-By default the server uses the MCP `stdio` transport. To use Streamable HTTP instead, start it explicitly:
+You can run the server directly through Node.js after installing dependencies:
 
 ```sh
-npm start -- --transport http
+node src/mcp-server.js
 ```
 
-The HTTP server prints a URL:
+The default transport is `stdio`, which is suitable when an MCP client launches the local server process. Configure the client with either command:
 
-```text
-MCP URL: http://127.0.0.1:3000/mcp/<access-key>
-```
+| Method | Command | Arguments |
+| --- | --- | --- |
+| npm | `npm` on Linux/macOS/WSL; `npm.cmd` on Windows | `start` |
+| Direct Node.js | `node` (or the absolute path to the Node.js executable) | `src/mcp-server.js` |
 
-Add that URL to your agent as a **Streamable HTTP** MCP server. The access key persists across restarts. Treat the complete URL as a credential: anyone with access can operate the connected account.
+Set the client's **Working directory** to the project root. npm needs it to find `package.json`, and relative audio paths resolve from it. The default `.ya/` directory is always in the project root, even when Node.js starts with an absolute script path. A custom relative `--token` path resolves from the process's working directory.
 
-The server runs locally and manages one Yandex account. Audio files are read directly from local paths. No dedicated audio directory is required.
-
-### stdio transport
-
-For MCP clients that launch a local server process, the default stdio transport is suitable:
-
-```sh
-npm start
-```
-
-The explicit form is `npm start -- --transport stdio`; `MCP_TRANSPORT=stdio` can also be used. In stdio mode MCP messages use the process's stdin/stdout, so diagnostic messages are written to stderr and no MCP URL is printed. Configure the client with the command `npm` and argument `start` (on Windows use `npm.cmd` if the client does not resolve `npm` automatically), or use the absolute path to `node` and `src/mcp-server.js`. Streamable HTTP remains available with `--transport http`.
+Use a command and paths for the MCP client's operating system: Linux/WSL cannot execute Windows `npm.cmd`. In WSL, use Linux paths, including `/mnt/c/...` for files on Windows drives.
 
 ## Sign in
 
@@ -121,18 +121,21 @@ Deleting a history record removes its `job_id` lookup and duplicate protection. 
 | --- | --- | --- |
 | `--host` | `MCP_HOST` | `127.0.0.1` |
 | `--port` | `MCP_PORT` | `3000` |
-| `--token` | `YANDEX_TOKEN_FILE` | `.ya/oauth.json` |
+| `--transport` | `MCP_TRANSPORT` | `stdio` (`stdio` or `http`) |
+| `--token` | `YANDEX_TOKEN_FILE` | `.ya/oauth.json` in the project root |
 | `--public-url` | `MCP_PUBLIC_URL` | Unset |
 
-For remote agents, put the server behind an HTTPS reverse proxy:
+`stdio` is the default for a local MCP client. To start the Streamable HTTP server, use:
 
 ```sh
-npm start -- --public-url https://music-mcp.example.com
+node src/mcp-server.js --transport http
 ```
 
-Forward `/mcp/` to the local server. Audio uploads run as background jobs, so only MCP JSON requests pass through the proxy. `--public-url` accepts an HTTPS origin, without a path. Bind another interface with `--host` only if your deployment requires it.
+The server prints an MCP URL such as `http://127.0.0.1:3000/mcp/<access-key>`. Add it to the agent as a **Streamable HTTP** MCP server. The access key persists across restarts; treat the complete URL as a credential.
 
-Persistent data lives in `.ya/` by default: `oauth.json`, `mcp-key.json`, and `mcp-uploads.json`. With a custom token path, the MCP key and upload history live next to that token file. Token and state files use owner-only permissions. Keep that directory private and persist it across deployments. `.ya/`, local test audio, dependencies, environment files, and IDE metadata are excluded from Git; npm package contents use an explicit allowlist.
+For remote agents, put the server behind an HTTPS reverse proxy and set `--public-url` to its origin, for example `https://music-mcp.example.com`. Forward `/mcp/` to the local server. Audio uploads run as background jobs, so only MCP requests pass through the proxy. `--public-url` must be an HTTPS origin without a path. Bind another interface with `--host` only if required.
+
+Persistent data lives in the project's `.ya/` directory by default: `oauth.json`, `mcp-key.json`, and `mcp-uploads.json`. This default location is based on the server module's location, so it does not change with the process's working directory. With a custom token path, the MCP key and upload history live next to that token file. Token and state files use owner-only permissions. Keep that directory private and persist it across deployments. `.ya/`, local test audio, dependencies, environment files, and IDE metadata are excluded from Git; npm package contents use an explicit allowlist.
 
 ## Development
 

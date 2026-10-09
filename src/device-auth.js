@@ -1,9 +1,9 @@
 import { randomBytes } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { writeState } from './state.js';
 
-export const defaultTokenPath = resolve('.ya/oauth.json');
+export const defaultTokenPath = fileURLToPath(new URL('../.ya/oauth.json', import.meta.url));
 const oauthOrigin = 'https://oauth.yandex.ru';
 const accountUrl = 'https://api.music.yandex.net/account/status';
 
