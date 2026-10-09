@@ -1,5 +1,5 @@
 {
-  "name": "ya-music-uploader",
+  "name": "ya-music-uploader-mcp",
   "version": "1.0.0",
   "description": "MCP server for Yandex Music authentication, playlists, and audio uploads",
   "scripts": {

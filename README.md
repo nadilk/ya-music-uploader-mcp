@@ -1,4 +1,4 @@
-# Yandex Music MCP Server
+# ya-music-uploader-mcp
 
 A [Model Context Protocol](https://modelcontextprotocol.io/) server for signing in to Yandex Music, managing playlists, and uploading personal audio files. Uses OAuth device login and native HTTP requests. Runs on WSL or a server without a browser or GUI.
 

@@ -15,7 +15,7 @@ export function createMcpApp({ service, accessKey, host = '127.0.0.1', publicOri
     }
     next();
   });
-  app.get('/health', (req, res) => res.json({ status: 'ok', service: 'yandex-music-uploader' }));
+  app.get('/health', (req, res) => res.json({ status: 'ok', service: 'ya-music-uploader-mcp' }));
   app.post(endpoint, async (req, res) => {
     const server = createMcpTools(service);
     const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });

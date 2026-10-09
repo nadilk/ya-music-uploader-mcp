@@ -8,7 +8,7 @@ const pageSize = z.number().int().min(1).max(100).default(50);
 const playlistId = z.string().min(1).describe('Playlist UUID or https://music.yandex.kz/playlists/<uuid>.');
 
 export function createMcpTools(service) {
-  const server = new McpServer({ name: 'yandex-music-uploader', version: '1.0.0' }, {
+  const server = new McpServer({ name: 'ya-music-uploader-mcp', version: '1.0.0' }, {
     instructions: 'Start with get_auth_status. If login is required, call init_auth, show the user verification_url and user_code, then call complete_auth. Repeat complete_auth with the same auth_id while pending. Pass the local audio file path to upload_track. Relative paths resolve from the server working directory; use get_server_info to see it. upload_track returns a background job; check get_upload_status. Repeated submissions reuse a job; never use force after an uncertain transfer without checking its status. This server manages one Yandex account.',
   });
   const register = (name, description, inputSchema, readOnly, handler) => {
