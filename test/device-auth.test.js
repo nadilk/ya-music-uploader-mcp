@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { pollDeviceToken, requestDeviceCode, refreshToken, verifyMusicToken } from '../src/device-auth.js';
+import { pollDeviceToken, requestDeviceCode, refreshToken, revokeToken, verifyMusicToken } from '../src/device-auth.js';
 
 function json(value, status = 200) { return new Response(JSON.stringify(value), { status }); }
 
@@ -37,4 +37,18 @@ test('refresh retains the old refresh token when the response does not rotate it
   });
   assert.equal(token.refresh_token, 'refresh');
   assert.equal(token.access_token, 'new');
+});
+
+test('device token revocation posts credentials and requires explicit confirmation', async () => {
+  await revokeToken({ access_token: 'private-token' }, async (url, options) => {
+    assert.equal(url, 'https://oauth.yandex.ru/revoke_token');
+    assert.equal(options.method, 'POST');
+    assert.equal(options.body.get('access_token'), 'private-token');
+    assert.ok(options.body.get('client_id'));
+    assert.ok(options.body.get('client_secret'));
+    assert.equal(options.redirect, 'error');
+    return json({ status: 'ok' });
+  });
+  await assert.rejects(revokeToken({ access_token: 'private-token' }, async () => json({ error: 'unsupported_token_type' }, 400)), /revocation/);
+  await assert.rejects(revokeToken({ access_token: 'private-token' }, async () => json({})), /revocation/);
 });

@@ -29,7 +29,7 @@ async function main() {
     help: { type: 'boolean' },
   } });
   if (values.help) {
-    console.log('npm start -- [--port 3000] [--host 127.0.0.1] [--token .auth/oauth.json] [--public-url https://music-mcp.example.com]');
+    console.log('npm start -- [--port 3000] [--host 127.0.0.1] [--token .ya/oauth.json] [--public-url https://music-mcp.example.com]');
     return;
   }
   const port = Number(values.port);

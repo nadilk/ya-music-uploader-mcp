@@ -22,6 +22,10 @@ export class AuthFlow {
     };
   }
 
+  reset() {
+    this.current = null;
+  }
+
   async init() {
     if (this.current?.status === 'pending' && this.current.expiresAt > this.now()) return this.describe(this.current);
     if (!this.initializing) {

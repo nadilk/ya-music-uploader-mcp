@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { writeState } from './state.js';
 
-export const defaultTokenPath = resolve('.auth/oauth.json');
+export const defaultTokenPath = resolve('.ya/oauth.json');
 const oauthOrigin = 'https://oauth.yandex.ru';
 const accountUrl = 'https://api.music.yandex.net/account/status';
 
@@ -16,6 +16,7 @@ async function oauthRequest(path, data, fetchImpl) {
   const response = await fetchImpl(`${oauthOrigin}/${path}`, {
     method: 'POST',
     body: new URLSearchParams(data),
+    redirect: 'error',
     signal: AbortSignal.timeout(30_000),
   });
   let result;
@@ -90,4 +91,12 @@ export async function refreshToken(token, fetchImpl = globalThis.fetch) {
     client_id: clientId, client_secret: clientSecret,
   }, fetchImpl));
   return { ...refreshed, refresh_token: refreshed.refresh_token ?? token.refresh_token };
+}
+
+// https://yandex.ru/dev/id/doc/ru/tokens/token-invalidate
+export async function revokeToken(token, fetchImpl = globalThis.fetch) {
+  const result = await oauthRequest('revoke_token', {
+    access_token: token.access_token, client_id: clientId, client_secret: clientSecret,
+  }, fetchImpl);
+  if (result.error || result.status !== 'ok') throw new Error('Yandex did not confirm token revocation.');
 }

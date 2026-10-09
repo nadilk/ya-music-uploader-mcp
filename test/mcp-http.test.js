@@ -6,6 +6,8 @@ import { createMcpApp } from '../src/mcp-http.js';
 
 test('real MCP client initializes, lists tools, and calls them over Streamable HTTP', async (t) => {
   const service = {
+    runOperation: async (handler) => handler(),
+    logout: async () => ({ authenticated: false, token_deleted: true, upload_history_deleted: true }),
     startUpload: async (input) => ({ job_id: 'local-job', ...input }),
     getAuthStatus: async () => ({ authenticated: true, uid: '123' }),
     listPlaylists: async ({ page, pageSize }) => ({ playlists: [{ id: 'example', title: 'Sample' }], page, page_size: pageSize }),
@@ -18,7 +20,8 @@ test('real MCP client initializes, lists tools, and calls them over Streamable H
   t.after(() => client.close());
   await client.connect(new StreamableHTTPClientTransport(new URL(`${origin}${endpoint}`)));
   const { tools } = await client.listTools();
-  for (const name of ['init_auth', 'complete_auth', 'list_playlists', 'create_playlist', 'upload_track', 'get_upload_status', 'list_playlist_tracks']) assert.ok(tools.some((tool) => tool.name === name));
+  for (const name of ['init_auth', 'complete_auth', 'logout', 'list_playlists', 'create_playlist', 'upload_track', 'get_upload_status', 'list_playlist_tracks']) assert.ok(tools.some((tool) => tool.name === name));
+  assert.equal(tools.find((tool) => tool.name === 'logout').annotations.destructiveHint, true);
   const upload = tools.find((tool) => tool.name === 'upload_track');
   assert.ok(upload.inputSchema.required.includes('file_path'));
   assert.equal(upload.inputSchema.properties.file_id, undefined);
@@ -32,6 +35,7 @@ test('real MCP client initializes, lists tools, and calls them over Streamable H
   const playlists = await client.callTool({ name: 'list_playlists', arguments: {} });
   assert.equal(playlists.structuredContent.page_size, 50);
   assert.equal((await client.callTool({ name: 'list_playlists', arguments: { page_size: 10000 } })).isError, true);
+  assert.equal((await client.callTool({ name: 'logout', arguments: {} })).structuredContent.upload_history_deleted, true);
   assert.equal((await fetch(`${origin}/mcp/wrong-key`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })).status, 404);
   assert.equal((await fetch(`${origin}${endpoint}`, { method: 'POST', headers: { origin: 'https://unrelated.example.com', 'content-type': 'application/json' }, body: '{}' })).status, 403);
 });
