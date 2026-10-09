@@ -1,6 +1,6 @@
 # ya-music-uploader-mcp
 
-A [Model Context Protocol](https://modelcontextprotocol.io/) server for signing in to Yandex Music, managing playlists, and uploading personal audio files. Uses OAuth device login and native HTTP requests. Runs on WSL or a server without a browser or GUI.
+A [Model Context Protocol](https://modelcontextprotocol.io/) server for signing in to Yandex Music, managing playlists, and uploading personal audio files. Uses OAuth device login and native HTTP requests. Runs natively on Windows, Linux, and WSL, including on a server without a browser or GUI.
 
 This project uses unofficial Yandex Music endpoints, which may change. Device login uses the public Android application credentials documented by [yandex-music-api](https://github.com/MarshalX/yandex-music-api/blob/main/yandex_music/_client/device_auth.py).
 
@@ -13,7 +13,13 @@ npm ci
 npm start
 ```
 
-The server prints a URL:
+By default the server uses the MCP `stdio` transport. To use Streamable HTTP instead, start it explicitly:
+
+```sh
+npm start -- --transport http
+```
+
+The HTTP server prints a URL:
 
 ```text
 MCP URL: http://127.0.0.1:3000/mcp/<access-key>
@@ -22,6 +28,16 @@ MCP URL: http://127.0.0.1:3000/mcp/<access-key>
 Add that URL to your agent as a **Streamable HTTP** MCP server. The access key persists across restarts. Treat the complete URL as a credential: anyone with access can operate the connected account.
 
 The server runs locally and manages one Yandex account. Audio files are read directly from local paths. No dedicated audio directory is required.
+
+### stdio transport
+
+For MCP clients that launch a local server process, the default stdio transport is suitable:
+
+```sh
+npm start
+```
+
+The explicit form is `npm start -- --transport stdio`; `MCP_TRANSPORT=stdio` can also be used. In stdio mode MCP messages use the process's stdin/stdout, so diagnostic messages are written to stderr and no MCP URL is printed. Configure the client with the command `npm` and argument `start` (on Windows use `npm.cmd` if the client does not resolve `npm` automatically), or use the absolute path to `node` and `src/mcp-server.js`. Streamable HTTP remains available with `--transport http`.
 
 ## Sign in
 

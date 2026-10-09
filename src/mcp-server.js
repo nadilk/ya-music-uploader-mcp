@@ -2,9 +2,11 @@ import { randomBytes } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { defaultTokenPath } from './device-auth.js';
 import { MusicService } from './mcp-service.js';
 import { createMcpApp } from './mcp-http.js';
+import { createMcpTools } from './mcp-tools.js';
 import { writeState } from './state.js';
 
 async function accessKey(path) {
@@ -26,12 +28,15 @@ async function main() {
     port: { type: 'string', default: process.env.MCP_PORT ?? '3000' },
     token: { type: 'string', default: process.env.YANDEX_TOKEN_FILE ?? defaultTokenPath },
     'public-url': { type: 'string', default: process.env.MCP_PUBLIC_URL },
+    transport: { type: 'string', default: process.env.MCP_TRANSPORT ?? 'stdio' },
     help: { type: 'boolean' },
   } });
   if (values.help) {
-    console.log('npm start -- [--port 3000] [--host 127.0.0.1] [--token .ya/oauth.json] [--public-url https://music-mcp.example.com]');
+    console.log('npm start -- [--transport stdio|http] [--port 3000] [--host 127.0.0.1] [--token .ya/oauth.json] [--public-url https://music-mcp.example.com]');
     return;
   }
+  const transportMode = values.transport;
+  if (!['http', 'stdio'].includes(transportMode)) throw new Error('Invalid transport. Use http or stdio.');
   const port = Number(values.port);
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('Invalid TCP port.');
   let publicOrigin;
@@ -46,6 +51,18 @@ async function main() {
   const stateDirectory = dirname(tokenPath);
   const service = new MusicService({ tokenPath, jobsPath: resolve(stateDirectory, 'mcp-uploads.json') });
   await service.initialize();
+  if (transportMode === 'stdio') {
+    const server = createMcpTools(service);
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    console.error('MCP transport: stdio');
+    const shutdown = async () => {
+      try { await server.close(); } finally { process.exit(0); }
+    };
+    process.once('SIGINT', shutdown);
+    process.once('SIGTERM', shutdown);
+    return;
+  }
   const key = await accessKey(resolve(stateDirectory, 'mcp-key.json'));
   const { app, endpoint } = createMcpApp({ service, accessKey: key, host: values.host, publicOrigin });
   const listener = await new Promise((resolve, reject) => {
