@@ -9,7 +9,7 @@ const playlistId = z.string().min(1).describe('Playlist UUID or https://music.ya
 
 export function createMcpTools(service) {
   const server = new McpServer({ name: 'ya-music-uploader-mcp', version: '1.0.0' }, {
-    instructions: 'Start with get_auth_status. If login is required, call init_auth, show the user verification_url and user_code, then call complete_auth. Repeat complete_auth with the same auth_id while pending. Find the audio file using your filesystem tools and pass its absolute path on the server machine to upload_track. Relative paths resolve from the directory where the server was started. upload_track returns a background job; check get_upload_status. Repeated submissions reuse a job; never use force after an uncertain transfer without checking its status. This server manages one Yandex account.',
+    instructions: 'Start with get_auth_status. If login is required, call init_auth, show the user verification_url and user_code, then call complete_auth. Repeat complete_auth with the same auth_id while pending. Find the audio file using your filesystem tools and pass its absolute path on the server machine to upload_track. Relative paths resolve from the project root. upload_track returns a background job; check get_upload_status. Repeated submissions reuse a job; never use force after an uncertain transfer without checking its status. This server manages one Yandex account.',
   });
   const register = (name, description, inputSchema, readOnly, handler, destructive = false) => {
     server.registerTool(name, {
@@ -45,7 +45,7 @@ export function createMcpTools(service) {
   register('list_playlist_tracks', 'Read a playlist page with track IDs, titles, durations, states, and next_page.', {
     playlist_id: playlistId, page, page_size: pageSize,
   }, true, ({ playlist_id, page, page_size }) => service.listPlaylistTracks({ playlistId: playlist_id, page, pageSize: page_size }));
-  register('upload_track', `Queue an audio upload to an owned playlist. Pass file_path as an absolute local path on the server machine (preferred) or a path relative to the directory where the server was started. Requires a non-empty MP3, FLAC, WAV, OGG, M4A, AAC, OPUS, or WMA file up to ${maximumFileSize / (1024 * 1024)} MiB. Returns job_id; check get_upload_status. Identical submissions reuse retained jobs; successful history expires after 30 days. force=true deliberately creates a new upload.`, {
+  register('upload_track', `Queue an audio upload to an owned playlist. Pass file_path as an absolute local path on the server machine (preferred) or a path relative to the project root. Requires a non-empty MP3, FLAC, WAV, OGG, M4A, AAC, OPUS, or WMA file up to ${maximumFileSize / (1024 * 1024)} MiB. Returns job_id; check get_upload_status. Identical submissions reuse retained jobs; successful history expires after 30 days. force=true deliberately creates a new upload.`, {
     file_path: z.string().trim().min(1).describe('Local audio file path on the machine running this MCP server.'),
     playlist_id: playlistId, force: z.boolean().default(false),
   }, false, ({ file_path, playlist_id, force }) => service.startUpload({ filePath: file_path, playlistId: playlist_id, force }));

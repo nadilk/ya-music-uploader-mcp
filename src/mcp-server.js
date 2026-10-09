@@ -7,6 +7,7 @@ import { defaultTokenPath } from './device-auth.js';
 import { MusicService } from './mcp-service.js';
 import { createMcpApp } from './mcp-http.js';
 import { createMcpTools } from './mcp-tools.js';
+import { projectRoot, resolveProjectPath } from './paths.js';
 import { writeState } from './state.js';
 
 async function accessKey(path) {
@@ -47,9 +48,9 @@ async function main() {
     }
     publicOrigin = publicUrl.origin;
   }
-  const tokenPath = resolve(values.token);
+  const tokenPath = resolveProjectPath(values.token);
   const stateDirectory = dirname(tokenPath);
-  const service = new MusicService({ tokenPath, jobsPath: resolve(stateDirectory, 'mcp-uploads.json') });
+  const service = new MusicService({ tokenPath, jobsPath: resolve(stateDirectory, 'mcp-uploads.json'), workingDirectory: projectRoot });
   await service.initialize();
   if (transportMode === 'stdio') {
     const server = createMcpTools(service);

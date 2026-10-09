@@ -7,6 +7,7 @@ import { createMusicClient, parsePlaylistId } from './music-client.js';
 import { writeState } from './state.js';
 import { audioExtensions, maximumFileSize } from './audio.js';
 import { revokeToken } from './device-auth.js';
+import { projectRoot } from './paths.js';
 
 const dayMilliseconds = 24 * 60 * 60 * 1000;
 const completeRetention = 30 * dayMilliseconds;
@@ -30,7 +31,7 @@ export function summarizeTrack(item) {
 }
 
 export class MusicService {
-  constructor({ tokenPath, jobsPath, workingDirectory = process.cwd(), clientFactory, auth, now = Date.now, sleep = setTimeout, fetchImpl = globalThis.fetch }) {
+  constructor({ tokenPath, jobsPath, workingDirectory = projectRoot, clientFactory, auth, now = Date.now, sleep = setTimeout, fetchImpl = globalThis.fetch }) {
     this.tokenPath = tokenPath;
     this.workingDirectory = resolve(workingDirectory);
     this.jobsPath = jobsPath;

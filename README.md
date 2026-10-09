@@ -28,14 +28,14 @@ You can run the server directly through Node.js after installing dependencies:
 node src/mcp-server.js
 ```
 
-The default transport is `stdio`, which is suitable when an MCP client launches the local server process. Configure the client with either command:
+The default transport is `stdio`, which is suitable when an MCP client launches the local server process. For MCP clients, use direct Node.js with the absolute script path so no working directory setting is needed:
 
-| Method | Command | Arguments |
-| --- | --- | --- |
-| npm | `npm` on Linux/macOS/WSL; `npm.cmd` on Windows | `start` |
-| Direct Node.js | `node` (or the absolute path to the Node.js executable) | `src/mcp-server.js` |
+| Method | Command | Arguments | Working directory |
+| --- | --- | --- | --- |
+| npm | `npm` on Linux/macOS/WSL; `npm.cmd` on Windows | `start` | Project root |
+| Direct Node.js | `node` (or the absolute path to the Node.js executable) | Absolute path to `src/mcp-server.js` | Not required |
 
-Set the client's **Working directory** to the project root. npm needs it to find `package.json`, and relative audio paths resolve from it. The default `.ya/` directory is always in the project root, even when Node.js starts with an absolute script path. A custom relative `--token` path resolves from the process's working directory.
+The server resolves its default state files, relative `--token` paths, and relative audio paths from the project root. The npm command needs the project root as its working directory to find `package.json`; the direct Node.js command does not.
 
 Use a command and paths for the MCP client's operating system: Linux/WSL cannot execute Windows `npm.cmd`. In WSL, use Linux paths, including `/mnt/c/...` for files on Windows drives.
 
@@ -69,7 +69,7 @@ Find the file using your agent's filesystem tools and pass its absolute path on 
 }
 ```
 
-Absolute paths are recommended and can point to any audio file readable by the server process. Relative paths resolve from the directory where you started the server; for example, `test-data/sample-30s.mp3` when started from the project root.
+Absolute paths are recommended and can point to any audio file readable by the server process. Relative paths resolve from the project root; for example, `test-data/sample-30s.mp3`.
 
 On WSL, use Linux paths such as `/home/user/Music/track.mp3` or `/mnt/c/Users/user/Music/track.mp3`.
 
@@ -122,7 +122,7 @@ Deleting a history record removes its `job_id` lookup and duplicate protection. 
 | `--host` | `MCP_HOST` | `127.0.0.1` |
 | `--port` | `MCP_PORT` | `3000` |
 | `--transport` | `MCP_TRANSPORT` | `stdio` (`stdio` or `http`) |
-| `--token` | `YANDEX_TOKEN_FILE` | `.ya/oauth.json` in the project root |
+| `--token` | `YANDEX_TOKEN_FILE` | `.ya/oauth.json` in the project root; relative overrides also resolve from the project root |
 | `--public-url` | `MCP_PUBLIC_URL` | Unset |
 
 `stdio` is the default for a local MCP client. To start the Streamable HTTP server, use:
