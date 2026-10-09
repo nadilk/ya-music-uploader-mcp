@@ -1,0 +1,11 @@
+node_modules/
+.auth/
+test-data/
+.idea/
+.env
+.env.*
+!.env.example
+coverage/
+*.log
+*.tgz
+.DS_Store

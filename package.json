@@ -1,0 +1,29 @@
+{
+  "name": "ya-music-uploader",
+  "version": "1.0.0",
+  "description": "MCP server for Yandex Music authentication, playlists, and audio uploads",
+  "scripts": {
+    "start": "node src/mcp-server.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "mcp",
+    "yandex-music",
+    "audio"
+  ],
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "express": "^5.2.1",
+    "zod": "^4.6.5"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ]
+}
